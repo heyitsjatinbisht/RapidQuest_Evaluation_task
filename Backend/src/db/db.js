@@ -1,16 +1,21 @@
-import mongoose from "mongoose";
+import { MongoClient } from "mongodb";
 
-const connectDb = async () => {
+let db;
+
+const connectDB = async () => {
+  if (db) return db;
+
   try {
-    const connectionInstance = await mongoose.connect(process.env.MONGODB_URI);
+    const client = new MongoClient(process.env.MONGODB_URI);
 
-    console.log(
-      `\n MongoDB connected !!DB HOST: ${connectionInstance.connection.host}`
-    );
-  } catch (error) {
-    console.log("Mongodb connection Failed", error);
-    process.exit(1);
+    await client.connect();
+    console.log("Connected to MongoDB");
+    db = client.db("RQ_Analytics");
+    return db;
+  } catch (err) {
+    console.error("Failed to connect to MongoDB", err);
+    throw err;
   }
 };
 
-export default connectDb;
+export default connectDB;
